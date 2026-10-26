@@ -53,6 +53,7 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("usuário não encontrado com o ID: " + id));
        //Valida se o novo email ja existe no Banco de dados
+
         if(!user.getEmail().equals(dto.email()) && userRepository.existsByEmail(dto.email())){
             throw new IllegalArgumentException("Este email já está em uso por outro usuário");
         }
