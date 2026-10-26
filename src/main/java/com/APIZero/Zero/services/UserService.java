@@ -19,6 +19,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public UserResponseDTO createUsser(UserRequestDTO dto){
         if(userRepository.existsByEmail(dto.email())){
             throw new IllegalArgumentException("Já existe um usuário cadastrado com este e-mail");
@@ -38,5 +39,36 @@ public class UserService {
                 .stream()
                 .map(UserResponseDTO::fromEntity)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponseDTO getUserById(Long id){
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("usuário não encontrado com o ID: " + id));
+        return UserResponseDTO.fromEntity(user);
+    }
+
+    @Transactional
+    public UserResponseDTO updateUser(Long id, UserRequestDTO dto){
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("usuário não encontrado com o ID: " + id));
+       //Valida se o novo email ja existe no Banco de dados
+        if(!user.getEmail().equals(dto.email()) && userRepository.existsByEmail(dto.email())){
+            throw new IllegalArgumentException("Este email já está em uso por outro usuário");
+        }
+
+        user.setUsername(dto.username());
+        user.setEmail(dto.email());
+        user.setPassword(dto.password());
+
+        return UserResponseDTO.fromEntity(user);
+    }
+
+    @Transactional
+    public void deleteUser(Long id){
+        if(!userRepository.existsById(id)){
+            throw new IllegalArgumentException("Usuário não encontrado com ID: " + id);
+        }
+        userRepository.deleteById(id);
     }
 }
