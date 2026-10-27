@@ -4,6 +4,7 @@ import com.APIZero.Zero.dto.UserRequestDTO;
 import com.APIZero.Zero.dto.UserResponseDTO;
 import com.APIZero.Zero.entities.User;
 import com.APIZero.Zero.repositories.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,10 +14,14 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+
 
     //injeção de dependencia via construtor
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -24,8 +29,11 @@ public class UserService {
         if(userRepository.existsByEmail(dto.email())){
             throw new IllegalArgumentException("Já existe um usuário cadastrado com este e-mail");
         }
+
+        String hashedPassword = passwordEncoder.encode(dto.password());
+
         //Cria um objeto user e salva com os dados do dto
-        User user = new User(dto.username(), dto.email(), dto.password());
+        User user = new User(dto.username(), dto.email(), hashedPassword);
 
         //Pega o user do objeto e salva no banco de dados
         User savedUser = userRepository.save(user);
