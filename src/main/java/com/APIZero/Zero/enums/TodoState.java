@@ -1,4 +1,9 @@
 package com.APIZero.Zero.enums;
 
-public class TodoState {
+public enum TodoState {
+    DRAFT,
+    TODO,
+    DOING,
+    DONE,
+    TRASH
 }
