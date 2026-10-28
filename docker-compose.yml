@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: apizero_postgres_novo
+    environment:
+      POSTGRES_DB: apizero_db
+      POSTGRES_USER: zero
+      POSTGRES_PASSWORD: zeropassword
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U adminzero -d apizero_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: apizero_app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5433/apizero_db
+      SPRING_DATASOURCE_USERNAME: zero
+      SPRING_DATASOURCE_PASSWORD: zeropassword
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped

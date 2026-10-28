@@ -1,0 +1,33 @@
+name: CI API ZERO
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  test-and-build:
+    name: Run Tests and Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Dar permissão de execução ao mvnw
+        run: chmod +x ./mvnw
+
+      - name: Executar testes (H2)
+        run: ./mvnw clean test
+
+      - name: Vallidar Empacotamento
+        run: ./mvnw clean package -DskipTests
