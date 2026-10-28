@@ -4,8 +4,11 @@ import com.APIZero.Zero.dto.TodoRequestDTO;
 import com.APIZero.Zero.dto.TodoResponseDTO;
 import com.APIZero.Zero.entities.Todo;
 import com.APIZero.Zero.entities.User;
+import com.APIZero.Zero.enums.TodoState;
 import com.APIZero.Zero.repositories.TodoRepository;
 import com.APIZero.Zero.repositories.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,15 +35,20 @@ public class TodoService {
 
         return TodoResponseDTO.fromEntity(savedTodo);
     }
-    @Transactional(readOnly = true)
-    public List<TodoResponseDTO> listTodos(String userEmail){
+
+
+    public Page<TodoResponseDTO> listTodos(String userEmail, String title, String description, TodoState state, Pageable pageable){
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado no banco de dados"));
-        return todoRepository.findAllByUserId(user.getId())
-                .stream()
-                .map(TodoResponseDTO::fromEntity)
-                .toList();
+
+        Page<Todo> todosPage = todoRepository.findTodosWithFilters(user.getId(), title, description, state, pageable);
+
+        return todosPage.map(TodoResponseDTO::fromEntity);
     }
+
+
+
+
     @Transactional
     public TodoResponseDTO updateTodo(Long id, TodoRequestDTO dto, String userEmail){
         User user = userRepository.findByEmail(userEmail)

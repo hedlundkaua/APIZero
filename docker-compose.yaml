@@ -1,0 +1,11 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: apizero_db
+    environment:
+      POSTGRES_DB: apizero_db
+      POSTGRES_USER: zero
+      POSTGRES_PASSWORD: zeropassword
+    ports:
+      - "5433:5432"
+    restart: unless-stopped

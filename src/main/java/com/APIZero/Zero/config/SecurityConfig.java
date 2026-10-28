@@ -1,7 +1,6 @@
 package com.APIZero.Zero.config;
 
 import com.APIZero.Zero.entities.User;
-import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -31,7 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(PathRequest.toH2Console()).permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
