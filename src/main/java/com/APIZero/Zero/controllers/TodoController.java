@@ -36,7 +36,6 @@ public class TodoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTodo);
     }
 
-
     @GetMapping
     public ResponseEntity<Page<TodoResponseDTO>> listTodos(
             Authentication authentication,
@@ -54,10 +53,6 @@ public class TodoController {
 
         return ResponseEntity.ok(todos);
     }
-
-
-
-
     @PutMapping("/{id}")
     public ResponseEntity<TodoResponseDTO> updateTodo(
             @PathVariable Long id,
@@ -80,5 +75,4 @@ public class TodoController {
 
         return ResponseEntity.noContent().build();
     }
-
 }

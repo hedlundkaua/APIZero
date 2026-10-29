@@ -9,8 +9,11 @@ import com.APIZero.Zero.repositories.TodoRepository;
 import com.APIZero.Zero.repositories.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -45,10 +48,6 @@ public class TodoService {
 
         return todosPage.map(TodoResponseDTO::fromEntity);
     }
-
-
-
-
     @Transactional
     public TodoResponseDTO updateTodo(Long id, TodoRequestDTO dto, String userEmail){
         User user = userRepository.findByEmail(userEmail)
@@ -69,6 +68,40 @@ public class TodoService {
         Todo todo = todoRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new IllegalAccessError("Tarefa não encontrada ou não pertence a esse usuario"));
 
+        todoRepository.delete(todo);
+    }
+
+    @Transactional
+    public TodoResponseDTO updateTodo(String userEmail, Long id, TodoRequestDTO request){
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado"));
+
+        Todo todo = todoRepository.findByIdAndUserId(id, user.getId())
+                .orElseThrow(() -> new IllegalAccessError("Tarefa não encontrada ou não pertence a esse usuario"));
+
+        if(!todo.getUser().getId().equals(user.getId())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado a está tarefa");
+        }
+
+        todo.setTitle(request.title());
+        todo.setDescription(request.description());
+        todo.setState(request.state());
+
+        Todo updatedTodo = todoRepository.save(todo);
+        return TodoResponseDTO.fromEntity(updatedTodo);
+    }
+
+    @Transactional
+    public void deleteTodo(String userEmail, Long id){
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado"));
+
+        Todo todo = todoRepository.findByIdAndUserId(id, user.getId())
+                .orElseThrow(() -> new IllegalAccessError("Tarefa não encontrada ou não pertence a esse usuario"));
+
+        if(!todo.getUser().getId().equals(todo.getId())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado a está tarefa");
+        }
         todoRepository.delete(todo);
     }
 }
